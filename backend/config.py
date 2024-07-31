@@ -1,24 +1,21 @@
-import os
-import sys
-import logging
 import importlib.metadata
-import pkgutil
-import chromadb
-from chromadb import Settings
-from bs4 import BeautifulSoup
-from typing import TypeVar, Generic
-from pydantic import BaseModel
-from typing import Optional
-
-from pathlib import Path
 import json
-import yaml
+import logging
+import os
+import pkgutil
+import shutil
+import sys
+from pathlib import Path
+from typing import Generic, Optional, TypeVar
 
+import chromadb
 import markdown
 import requests
-import shutil
-
+import yaml
+from bs4 import BeautifulSoup
+from chromadb import Settings
 from constants import ERROR_MESSAGES
+from pydantic import BaseModel
 
 ####################################
 # Load .env file
@@ -30,7 +27,7 @@ BASE_DIR = BACKEND_DIR.parent  # the path containing the backend/
 print(BASE_DIR)
 
 try:
-    from dotenv import load_dotenv, find_dotenv
+    from dotenv import find_dotenv, load_dotenv
 
     load_dotenv(find_dotenv(str(BASE_DIR / ".env")))
 except ImportError:
@@ -77,9 +74,9 @@ for source in log_sources:
 
 log.setLevel(SRC_LOG_LEVELS["CONFIG"])
 
-WEBUI_NAME = os.environ.get("WEBUI_NAME", "Open WebUI")
-if WEBUI_NAME != "Open WebUI":
-    WEBUI_NAME += " (Open WebUI)"
+WEBUI_NAME = os.environ.get("WEBUI_NAME", "C-Link AI Service")
+if WEBUI_NAME != "C-Link AI Service":
+    WEBUI_NAME += " (C-Link AI Service)"
 
 WEBUI_URL = os.environ.get("WEBUI_URL", "http://localhost:3000")
 
@@ -870,7 +867,7 @@ SEARCH_QUERY_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
     os.environ.get(
         "SEARCH_QUERY_GENERATION_PROMPT_TEMPLATE",
         """You are tasked with generating web search queries. Give me an appropriate query to answer my question for google search. Answer with only the query. Today is {{CURRENT_DATE}}.
-        
+
 Question:
 {{prompt:end:4000}}""",
     ),
