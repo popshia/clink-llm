@@ -32,7 +32,7 @@
 		]
 	},
 	"rag": {
-		"pdf_extract_images": false,
+		"pdf_extract_images": true,
 		"youtube_loader_language": [
 			"en"
 		],
@@ -53,7 +53,17 @@
 				"result_count": 3,
 				"concurrent_requests": 10
 			}
-		}
+		},
+		"embedding_engine": "ollama",
+		"embedding_model": "all-minilm:33m",
+		"CONTENT_EXTRACTION_ENGINE": "",
+		"tika_server_url": "http://tika:9998",
+		"chunk_size": 1500,
+		"chunk_overlap": 100,
+		"template": "Use the following context as your learned knowledge, inside <context></context> XML tags.\n<context>\n    [context]\n</context>\n\nWhen answer to user:\n- If you don't know, just say that you don't know.\n- If you don't know when you are not sure, ask for clarification.\nAvoid mentioning that you obtained the information from the context.\nAnd answer according to the language of the user's question.\n\nGiven the context information, answer the query.\nQuery: [query]",
+		"top_k": 5,
+		"relevance_threshold": 0.0,
+		"enable_hybrid_search": false
 	},
 	"task": {
 		"model": {

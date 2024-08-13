@@ -195,6 +195,7 @@
 								<input
 									bind:value={email}
 									type="email"
+									id="email_field"
 									class=" px-5 py-3 rounded-2xl w-full text-sm outline-none border dark:border-none dark:bg-gray-900"
 									autocomplete="email"
 									placeholder={$i18n.t('Enter Your Email')}
@@ -208,6 +209,7 @@
 								<input
 									bind:value={password}
 									type="password"
+									id="password_field"
 									class=" px-5 py-3 rounded-2xl w-full text-sm outline-none border dark:border-none dark:bg-gray-900"
 									placeholder={$i18n.t('Enter Your Password')}
 									autocomplete="current-password"
