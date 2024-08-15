@@ -1,7 +1,21 @@
+#!/bin/bash
+
 # dependecies
-sudo apt update
-sudo apt install -y curl ca-certificates
-sudo apt install -y python3.11
+apt-get update
+apt-get install -y curl ca-certificates gcc python3.11
+
+# gpu drivers
+ubuntu-drivers install
+
+# NVIDIA cuda toolkit
+lspci | grep -i nvidia
+apt-get install linux-headers-"$(uname -r)"
+apt-key del 7fa2af80
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+dpkg -i cuda-keyring_1.1-1_all.deb
+apt-get update
+apt-get -y install cuda-toolkit-12-6
+apt-get install -y nvidia-open
 
 # conda
 mkdir -p ~/miniconda3
@@ -12,17 +26,17 @@ rm -rf ~/miniconda3/miniconda.sh
 
 # nodejs
 curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
-sudo -E bash nodesource_setup.sh
-sudo apt install -y nodejs
+bash nodesource_setup.sh
+apt-get install -y nodejs
 
 # docker
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
 echo \
 	"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |
-	sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+	tee /etc/apt/sources.list.d/docker.list >/dev/null
 
 # ollama
 curl -fsSL https://ollama.com/install.sh | sh
