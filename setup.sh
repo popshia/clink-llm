@@ -18,11 +18,11 @@ apt-get -y install cuda-toolkit-12-6
 apt-get install -y nvidia-open
 
 # conda
-mkdir -p /home/ai/miniconda3
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/ai/miniconda3/miniconda.sh
-bash /home/ai/miniconda3/miniconda.sh -b -u -p /home/ai/miniconda3
-rm -rf /home/ai/miniconda3/miniconda.sh
-/home/ai/miniconda3/bin/conda init bash
+mkdir -p /home/"$1"/miniconda3
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/"$1"/miniconda3/miniconda.sh
+bash /home/"$1"/miniconda3/miniconda.sh -b -u -p /home/"$1"/miniconda3
+rm -rf /home/"$1"/miniconda3/miniconda.sh
+/home/"$1"/miniconda3/bin/conda init bash
 bash
 
 # nodejs
@@ -42,10 +42,14 @@ echo \
 # ollama
 curl -fsSL https://ollama.com/install.sh | sh
 ollama --version
+ollama pull llava-llama3:latest
+ollama pull all-minilm:33m
+ollama pull llama3.1:8b-instruct-q6_K
+ollama pull jcai/llama3-taide-lx-8b-chat-alpha1:q6_k
 
 # clink-llm
 npm install && npm run build
-cd /home/ai/repos/clink-llm/backend || exit
+cd /home/"$1"/clink-llm/backend || exit
 
 # create conda env
 conda create -n clink-llm python=3.11 -y
@@ -53,4 +57,4 @@ conda activate clink-llm
 pip install -r requirements.txt -U
 
 # start
-bash /home/ai/repos/clink-llm/backend/start.sh
+bash /home/"$1"/clink-llm/backend/start.sh
