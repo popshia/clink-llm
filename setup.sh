@@ -8,10 +8,10 @@ apt-get update
 apt-get install -y curl ca-certificates gcc ffmpeg
 
 # gpu drivers
-echo "
-## INSTALL GPU DRIVERS ##
-"
-ubuntu-drivers install
+# echo "
+# ## INSTALL GPU DRIVERS ##
+# "
+# ubuntu-drivers install
 
 # NVIDIA cuda toolkit
 echo "
@@ -35,7 +35,7 @@ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$
 bash "$HOME"/miniconda3/miniconda.sh -b -u -p "$HOME"/miniconda3
 rm -rf "$HOME"/miniconda3/miniconda.sh
 "$HOME"/miniconda3/bin/conda init bash
-bash
+source "$HOME"/.bashrc
 
 # nodejs
 echo "
@@ -72,15 +72,14 @@ ollama pull jcai/llama3-taide-lx-8b-chat-alpha1:q6_k
 echo "
 ## CLONE LLM REPO AND BUILD WITH NODEJS ##
 "
-git clone https://github.com/popshia/clink-llm
 cd "$HOME"/clink-llm || exit
 npm install && npm run build
-cd "$HOME"/clink-llm/backend || exit
 
 # create conda env
 echo "
 ## CREATE CONDA ENVIRONMENT AND INSTALL REQUIREMENTS ##
 "
+cd "$HOME"/clink-llm/backend || exit
 conda create -n clink-llm python=3.11 -y
 conda activate clink-llm
 pip install -r requirements.txt -U
