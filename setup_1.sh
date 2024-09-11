@@ -7,12 +7,6 @@ echo "
 apt-get update
 apt-get install -y curl ca-certificates gcc ffmpeg
 
-# gpu drivers
-# echo "
-# ## INSTALL GPU DRIVERS ##
-# "
-# ubuntu-drivers install
-
 # NVIDIA cuda toolkit
 echo "
 ## INSTALL NVIDIA CUDA TOOLKIT AND CUDNN ##
@@ -45,28 +39,16 @@ curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
 bash nodesource_setup.sh
 apt-get install -y nodejs
 
-# docker
-echo "
-## INSTALL DOCKER ##
-"
-install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-chmod a+r /etc/apt/keyrings/docker.asc
-echo \
-	"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |
-	tee /etc/apt/sources.list.d/docker.list >/dev/null
-
 # ollama
 echo "
 ## INSTALL OLLAMA ##
 "
 curl -fsSL https://ollama.com/install.sh | sh
 ollama --version
-ollama pull llava-llama3:latest
-ollama pull all-minilm:33m
-ollama pull llama3.1:8b-instruct-q6_K
-ollama pull jcai/llama3-taide-lx-8b-chat-alpha1:q6_k
+# ollama pull llava-llama3:latest
+# ollama pull all-minilm:33m
+# ollama pull llama3.1:8b-instruct-q6_K
+# ollama pull jcai/llama3-taide-lx-8b-chat-alpha1:q6_k
 
 # clink-llm
 echo "
@@ -81,11 +63,3 @@ echo "
 "
 cd "$HOME"/clink-llm/backend || exit
 conda create -n clink-llm python=3.11 -y
-conda activate clink-llm
-pip install -r requirements.txt -U
-
-# start
-echo "
-## START THE LLM SERVER ##
-"
-bash "$HOME"/clink-llm/backend/start.sh
