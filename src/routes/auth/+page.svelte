@@ -111,7 +111,7 @@
 				<img
 					crossorigin="anonymous"
 					src="{WEBUI_BASE_URL}/static/favicon.png"
-					class=" w-8 rounded-full"
+					class=" w-8"
 					alt="logo"
 				/>
 			</div>

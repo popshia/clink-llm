@@ -306,7 +306,7 @@
 							<img
 								crossorigin="anonymous"
 								alt="model profile"
-								class="size-5 max-w-[28px] object-cover rounded-full"
+								class="size-5 max-w-[28px] object-cover"
 								src={$models.find((model) => model.id === atSelectedModel.id)?.info?.meta
 									?.profile_image_url ??
 									($i18n.language === 'dg-DG'

@@ -136,26 +136,6 @@
 		<div class="">
 			<div class=" mb-1 text-sm font-medium">{$i18n.t('UI Settings')}</div>
 
-			<!-- <div class="flex w-full justify-between"> -->
-			<!-- 	<div class=" self-center text-xs font-medium">{$i18n.t('Theme')}</div> -->
-			<!-- 	<div class="flex items-center relative"> -->
-			<!-- 		<select -->
-			<!-- 			class=" dark:bg-gray-900 w-fit pr-8 rounded py-2 px-2 text-xs bg-transparent outline-none text-right" -->
-			<!-- 			bind:value={selectedTheme} -->
-			<!-- 			placeholder="Select a theme" -->
-			<!-- 			on:change={() => themeChangeHandler(selectedTheme)} -->
-			<!-- 		> -->
-			<!-- 			<option value="system">⚙️ {$i18n.t('System')}</option> -->
-			<!-- 			<option value="dark">🌑 {$i18n.t('Dark')}</option> -->
-			<!-- 			<option value="oled-dark">🌃 {$i18n.t('OLED Dark')}</option> -->
-			<!-- 			<option value="light">☀️ {$i18n.t('Light')}</option> -->
-			<!-- 			<option value="her">🌷 Her</option> -->
-			<!-- 			<!-- <option value="rose-pine dark">🪻 {$i18n.t('Rosé Pine')}</option> -->
-			<!-- 			<option value="rose-pine-dawn light">🌷 {$i18n.t('Rosé Pine Dawn')}</option> --> -->
-			<!-- 		</select> -->
-			<!-- 	</div> -->
-			<!-- </div> -->
-
 			<div class=" flex w-full justify-between">
 				<div class=" self-center text-xs font-medium">{$i18n.t('Language')}</div>
 				<div class="flex items-center relative">
