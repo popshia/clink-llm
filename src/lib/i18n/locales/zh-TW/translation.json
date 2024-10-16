@@ -566,7 +566,7 @@
   "Select only one model to call": "僅選擇一個模型來呼叫",
   "Selected model(s) do not support image inputs": "選取的模型不支援圖片輸入",
   "Send": "傳送",
-  "Send a Message": "傳送訊息",
+  "Send a Message": "傳送訊息或以“#”為開頭檢索資料庫文件",
   "Send message": "傳送訊息",
   "September": "9 月",
   "Serper API Key": "Serper API 金鑰",

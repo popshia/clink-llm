@@ -1,0 +1,3 @@
+markdownify
+mammoth
+pyqt5
