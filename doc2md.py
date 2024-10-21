@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QProgressBar,
     QPushButton,
     QTextEdit,
     QVBoxLayout,
@@ -32,7 +33,7 @@ class DocToMarkdown(QWidget):
         self.docx_input = QTextEdit(self)
         layout.addWidget(self.docx_input)
         self.docx_button = QPushButton("Browse", self)
-        self.docx_button.clicked.connect(self.select_docx_file)
+        self.docx_button.clicked.connect(self.select_docx_files)
         layout.addWidget(self.docx_button)
 
         # Label and input for .md file
@@ -49,11 +50,14 @@ class DocToMarkdown(QWidget):
         self.convert_button.clicked.connect(self.convert)
         layout.addWidget(self.convert_button)
 
+        # Progress bar
+        self.progress_bar = QProgressBar(self)
+        layout.addWidget(self.progress_bar)
+
         # Set layout
         self.setLayout(layout)
 
-    # Function to select .docx file
-    def select_docx_file(self):
+    def select_docx_files(self):
         options = QFileDialog.Options()
         self.input_docs, _ = QFileDialog.getOpenFileNames(
             self,
@@ -66,6 +70,9 @@ class DocToMarkdown(QWidget):
             for name in self.input_docs:
                 self.docx_input.append(Path(name).name)
 
+        self.progress_bar.setRange(0, len(self.input_docs))
+        self.progress_bar.setFormat("%v/%m")
+
     def select_md_save_path(self):
         options = QFileDialog.Options()
         save_path = QFileDialog.getExistingDirectory(
@@ -74,10 +81,9 @@ class DocToMarkdown(QWidget):
         if save_path:
             self.md_input.setText(save_path)
 
-    # Convert function
     def convert(self):
         try:
-            for doc in self.input_docs:
+            for i, doc in enumerate(self.input_docs):
                 save_md = Path(
                     self.md_input.text(),
                     Path(Path(doc).stem).with_suffix(".md").as_posix(),
@@ -87,6 +93,8 @@ class DocToMarkdown(QWidget):
                     html = result.value
                     with open(save_md, "w") as output_md:
                         output_md.write(md(html))
+
+                self.progress_bar.setValue(i + 1)
 
             QMessageBox.information(
                 self, "Success", f"Markdown file(s) saved at: {self.md_input.text()}"
