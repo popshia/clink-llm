@@ -1,8 +1,9 @@
+import sys
 from pathlib import Path
 
 import mammoth
 from markdownify import markdownify as md
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
     QLabel,
@@ -22,26 +23,26 @@ class DocToMarkdown(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle("Word to Markdown Converter")
+        self.setWindowTitle("Doc to Markdown Converter")
 
         # Layout
         layout = QVBoxLayout()
 
         # Label and input for .docx file
-        self.docx_label = QLabel("Select .doc files:")
+        self.docx_label = QLabel("Selected .docx files:")
         layout.addWidget(self.docx_label)
         self.docx_input = QTextEdit(self)
         layout.addWidget(self.docx_input)
-        self.docx_button = QPushButton("Browse", self)
+        self.docx_button = QPushButton("Choose file", self)
         self.docx_button.clicked.connect(self.select_docx_files)
         layout.addWidget(self.docx_button)
 
         # Label and input for .md file
-        self.md_label = QLabel("Select the save path:")
+        self.md_label = QLabel("Selected save path:")
         layout.addWidget(self.md_label)
         self.md_input = QLineEdit(self)
         layout.addWidget(self.md_input)
-        self.md_button = QPushButton("Browse", self)
+        self.md_button = QPushButton("Select save directory", self)
         self.md_button.clicked.connect(self.select_md_save_path)
         layout.addWidget(self.md_button)
 
@@ -58,13 +59,11 @@ class DocToMarkdown(QWidget):
         self.setLayout(layout)
 
     def select_docx_files(self):
-        options = QFileDialog.Options()
         self.input_docs, _ = QFileDialog.getOpenFileNames(
             self,
             "Select Word Document",
             "/home/noah/Documents/rag_test/contract/",
             "Word Files (*.docx)",
-            options=options,
         )
         if self.input_docs:
             for name in self.input_docs:
@@ -74,10 +73,7 @@ class DocToMarkdown(QWidget):
         self.progress_bar.setFormat("%v/%m")
 
     def select_md_save_path(self):
-        options = QFileDialog.Options()
-        save_path = QFileDialog.getExistingDirectory(
-            self, "Select Save Directory", "", options=options
-        )
+        save_path = QFileDialog.getExistingDirectory(self, "Select Save Directory", "")
         if save_path:
             self.md_input.setText(save_path)
 
@@ -97,8 +93,11 @@ class DocToMarkdown(QWidget):
                 self.progress_bar.setValue(i + 1)
 
             QMessageBox.information(
-                self, "Success", f"Markdown file(s) saved at: {self.md_input.text()}"
+                self,
+                "Success",
+                f"Converted Markdown file(s) saved at: {self.md_input.text()}",
             )
+            self.progress_bar.setValue(0)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
@@ -106,10 +105,8 @@ class DocToMarkdown(QWidget):
 
 # Main function to start the application
 if __name__ == "__main__":
-    import sys
-
     app = QApplication(sys.argv)
     converter = DocToMarkdown()
     converter.resize(400, 200)
     converter.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
