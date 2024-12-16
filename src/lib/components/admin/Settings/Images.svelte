@@ -27,6 +27,43 @@
 
 	let models = null;
 
+	let samplers = [
+		'DPM++ 2M',
+		'DPM++ SDE',
+		'DPM++ 2M SDE',
+		'DPM++ 2M SDE Heun',
+		'DPM++ 2S a',
+		'DPM++ 3M SDE',
+		'Euler a',
+		'Euler',
+		'LMS',
+		'Heun',
+		'DPM2',
+		'DPM2 a',
+		'DPM fast',
+		'DPM adaptive',
+		'Restart',
+		'DDIM',
+		'DDIM CFG++',
+		'PLMS',
+		'UniPC'
+	];
+
+	let schedulers = [
+		'Automatic',
+		'Uniform',
+		'Karras',
+		'Exponential',
+		'Polyexponential',
+		'SGM Uniform',
+		'KL Optimal',
+		'Align Your Steps',
+		'Simple',
+		'Normal',
+		'DDIM',
+		'Beta'
+	];
+
 	let requiredWorkflowNodes = [
 		{
 			type: 'prompt',
@@ -326,6 +363,66 @@
 							</a>
 						</div>
 					</div>
+
+					<!---Sampler-->
+					<div>
+						<div class=" mb-2.5 text-sm font-medium">{$i18n.t('Set Sampler')}</div>
+						<div class="flex w-full">
+							<div class="flex-1 mr-2">
+								<Tooltip content={$i18n.t('Enter Sampler (e.g. Euler a)')} placement="top-start">
+									<input
+										list="sampler-list"
+										class="w-full rounded-lg py-2 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
+										placeholder={$i18n.t('Enter Sampler (e.g. Euler a)')}
+										bind:value={config.automatic1111.AUTOMATIC1111_SAMPLER}
+									/>
+
+									<datalist id="sampler-list">
+										{#each samplers ?? [] as sampler}
+											<option value={sampler}>{sampler}</option>
+										{/each}
+									</datalist>
+								</Tooltip>
+							</div>
+						</div>
+					</div>
+					<!---Scheduler-->
+					<div>
+						<div class=" mb-2.5 text-sm font-medium">{$i18n.t('Set Scheduler')}</div>
+						<div class="flex w-full">
+							<div class="flex-1 mr-2">
+								<Tooltip content={$i18n.t('Enter Scheduler (e.g. Karras)')} placement="top-start">
+									<input
+										list="scheduler-list"
+										class="w-full rounded-lg py-2 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
+										placeholder={$i18n.t('Enter Scheduler (e.g. Karras)')}
+										bind:value={config.automatic1111.AUTOMATIC1111_SCHEDULER}
+									/>
+
+									<datalist id="scheduler-list">
+										{#each schedulers ?? [] as scheduler}
+											<option value={scheduler}>{scheduler}</option>
+										{/each}
+									</datalist>
+								</Tooltip>
+							</div>
+						</div>
+					</div>
+					<!---CFG scale-->
+					<div>
+						<div class=" mb-2.5 text-sm font-medium">{$i18n.t('Set CFG Scale')}</div>
+						<div class="flex w-full">
+							<div class="flex-1 mr-2">
+								<Tooltip content={$i18n.t('Enter CFG Scale (e.g. 7.0)')} placement="top-start">
+									<input
+										class="w-full rounded-lg py-2 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
+										placeholder={$i18n.t('Enter CFG Scale (e.g. 7.0)')}
+										bind:value={config.automatic1111.AUTOMATIC1111_CFG_SCALE}
+									/>
+								</Tooltip>
+							</div>
+						</div>
+					</div>
 				{:else if config?.engine === 'comfyui'}
 					<div class="">
 						<div class=" mb-2 text-sm font-medium">{$i18n.t('ComfyUI Base URL')}</div>
@@ -469,7 +566,7 @@
 
 						<div class="flex gap-2 mb-1">
 							<input
-								class="flex-1 w-full rounded-lg py-2 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
+								class="flex-1 w-full text-sm bg-transparent outline-none"
 								placeholder={$i18n.t('API Base URL')}
 								bind:value={config.openai.OPENAI_API_BASE_URL}
 								required
@@ -551,7 +648,7 @@
 
 	<div class="flex justify-end pt-3 text-sm font-medium">
 		<button
-			class=" px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-gray-100 transition rounded-lg flex flex-row space-x-1 items-center {loading
+			class="px-3.5 py-1.5 text-sm font-medium bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full flex flex-row space-x-1 items-center {loading
 				? ' cursor-not-allowed'
 				: ''}"
 			type="submit"

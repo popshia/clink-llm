@@ -17,6 +17,9 @@ from open_webui.apps.images.utils.comfyui import (
 from open_webui.config import (
     AUTOMATIC1111_API_AUTH,
     AUTOMATIC1111_BASE_URL,
+    AUTOMATIC1111_CFG_SCALE,
+    AUTOMATIC1111_SAMPLER,
+    AUTOMATIC1111_SCHEDULER,
     CACHE_DIR,
     COMFYUI_BASE_URL,
     COMFYUI_WORKFLOW,
@@ -32,7 +35,8 @@ from open_webui.config import (
     AppConfig,
 )
 from open_webui.constants import ERROR_MESSAGES
-from open_webui.env import SRC_LOG_LEVELS
+from open_webui.env import ENV, SRC_LOG_LEVELS, ENABLE_FORWARD_USER_INFO_HEADERS
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -44,7 +48,12 @@ log.setLevel(SRC_LOG_LEVELS["IMAGES"])
 IMAGE_CACHE_DIR = Path(CACHE_DIR).joinpath("./image/generations/")
 IMAGE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI()
+app = FastAPI(
+    docs_url="/docs" if ENV == "dev" else None,
+    openapi_url="/openapi.json" if ENV == "dev" else None,
+    redoc_url=None,
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ALLOW_ORIGIN,
@@ -65,6 +74,9 @@ app.state.config.MODEL = IMAGE_GENERATION_MODEL
 
 app.state.config.AUTOMATIC1111_BASE_URL = AUTOMATIC1111_BASE_URL
 app.state.config.AUTOMATIC1111_API_AUTH = AUTOMATIC1111_API_AUTH
+app.state.config.AUTOMATIC1111_CFG_SCALE = AUTOMATIC1111_CFG_SCALE
+app.state.config.AUTOMATIC1111_SAMPLER = AUTOMATIC1111_SAMPLER
+app.state.config.AUTOMATIC1111_SCHEDULER = AUTOMATIC1111_SCHEDULER
 app.state.config.COMFYUI_BASE_URL = COMFYUI_BASE_URL
 app.state.config.COMFYUI_WORKFLOW = COMFYUI_WORKFLOW
 app.state.config.COMFYUI_WORKFLOW_NODES = COMFYUI_WORKFLOW_NODES
@@ -85,6 +97,9 @@ async def get_config(request: Request, user=Depends(get_admin_user)):
         "automatic1111": {
             "AUTOMATIC1111_BASE_URL": app.state.config.AUTOMATIC1111_BASE_URL,
             "AUTOMATIC1111_API_AUTH": app.state.config.AUTOMATIC1111_API_AUTH,
+            "AUTOMATIC1111_CFG_SCALE": app.state.config.AUTOMATIC1111_CFG_SCALE,
+            "AUTOMATIC1111_SAMPLER": app.state.config.AUTOMATIC1111_SAMPLER,
+            "AUTOMATIC1111_SCHEDULER": app.state.config.AUTOMATIC1111_SCHEDULER,
         },
         "comfyui": {
             "COMFYUI_BASE_URL": app.state.config.COMFYUI_BASE_URL,
@@ -102,6 +117,9 @@ class OpenAIConfigForm(BaseModel):
 class Automatic1111ConfigForm(BaseModel):
     AUTOMATIC1111_BASE_URL: str
     AUTOMATIC1111_API_AUTH: str
+    AUTOMATIC1111_CFG_SCALE: Optional[str]
+    AUTOMATIC1111_SAMPLER: Optional[str]
+    AUTOMATIC1111_SCHEDULER: Optional[str]
 
 
 class ComfyUIConfigForm(BaseModel):
@@ -133,6 +151,22 @@ async def update_config(form_data: ConfigForm, user=Depends(get_admin_user)):
         form_data.automatic1111.AUTOMATIC1111_API_AUTH
     )
 
+    app.state.config.AUTOMATIC1111_CFG_SCALE = (
+        float(form_data.automatic1111.AUTOMATIC1111_CFG_SCALE)
+        if form_data.automatic1111.AUTOMATIC1111_CFG_SCALE
+        else None
+    )
+    app.state.config.AUTOMATIC1111_SAMPLER = (
+        form_data.automatic1111.AUTOMATIC1111_SAMPLER
+        if form_data.automatic1111.AUTOMATIC1111_SAMPLER
+        else None
+    )
+    app.state.config.AUTOMATIC1111_SCHEDULER = (
+        form_data.automatic1111.AUTOMATIC1111_SCHEDULER
+        if form_data.automatic1111.AUTOMATIC1111_SCHEDULER
+        else None
+    )
+
     app.state.config.COMFYUI_BASE_URL = form_data.comfyui.COMFYUI_BASE_URL.strip("/")
     app.state.config.COMFYUI_WORKFLOW = form_data.comfyui.COMFYUI_WORKFLOW
     app.state.config.COMFYUI_WORKFLOW_NODES = form_data.comfyui.COMFYUI_WORKFLOW_NODES
@@ -147,6 +181,9 @@ async def update_config(form_data: ConfigForm, user=Depends(get_admin_user)):
         "automatic1111": {
             "AUTOMATIC1111_BASE_URL": app.state.config.AUTOMATIC1111_BASE_URL,
             "AUTOMATIC1111_API_AUTH": app.state.config.AUTOMATIC1111_API_AUTH,
+            "AUTOMATIC1111_CFG_SCALE": app.state.config.AUTOMATIC1111_CFG_SCALE,
+            "AUTOMATIC1111_SAMPLER": app.state.config.AUTOMATIC1111_SAMPLER,
+            "AUTOMATIC1111_SCHEDULER": app.state.config.AUTOMATIC1111_SCHEDULER,
         },
         "comfyui": {
             "COMFYUI_BASE_URL": app.state.config.COMFYUI_BASE_URL,
@@ -425,6 +462,12 @@ async def image_generations(
             headers["Authorization"] = f"Bearer {app.state.config.OPENAI_API_KEY}"
             headers["Content-Type"] = "application/json"
 
+            if ENABLE_FORWARD_USER_INFO_HEADERS:
+                headers["X-OpenWebUI-User-Name"] = user.name
+                headers["X-OpenWebUI-User-Id"] = user.id
+                headers["X-OpenWebUI-User-Email"] = user.email
+                headers["X-OpenWebUI-User-Role"] = user.role
+
             data = {
                 "model": (
                     app.state.config.MODEL
@@ -439,7 +482,9 @@ async def image_generations(
                 "response_format": "b64_json",
             }
 
-            r = requests.post(
+            # Use asyncio.to_thread for the requests.post call
+            r = await asyncio.to_thread(
+                requests.post,
                 url=f"{app.state.config.OPENAI_API_BASE_URL}/images/generations",
                 json=data,
                 headers=headers,
@@ -523,6 +568,15 @@ async def image_generations(
 
             if form_data.negative_prompt is not None:
                 data["negative_prompt"] = form_data.negative_prompt
+
+            if app.state.config.AUTOMATIC1111_CFG_SCALE:
+                data["cfg_scale"] = app.state.config.AUTOMATIC1111_CFG_SCALE
+
+            if app.state.config.AUTOMATIC1111_SAMPLER:
+                data["sampler_name"] = app.state.config.AUTOMATIC1111_SAMPLER
+
+            if app.state.config.AUTOMATIC1111_SCHEDULER:
+                data["scheduler"] = app.state.config.AUTOMATIC1111_SCHEDULER
 
             # Use asyncio.to_thread for the requests.post call
             r = await asyncio.to_thread(

@@ -45,6 +45,7 @@
 
 	let params = {
 		// Advanced
+		stream_response: null,
 		seed: null,
 		temperature: null,
 		frequency_penalty: null,
@@ -54,6 +55,7 @@
 		mirostat_tau: null,
 		top_k: null,
 		top_p: null,
+		min_p: null,
 		stop: null,
 		tfs_z: null,
 		num_ctx: null,
@@ -114,6 +116,29 @@
 			document.documentElement.classList.add(e);
 		});
 
+		const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+		if (metaThemeColor) {
+			if (_theme.includes('system')) {
+				const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+					? 'dark'
+					: 'light';
+				console.log('Setting system meta theme color: ' + systemTheme);
+				metaThemeColor.setAttribute('content', systemTheme === 'light' ? '#ffffff' : '#171717');
+			} else {
+				console.log('Setting meta theme color: ' + _theme);
+				metaThemeColor.setAttribute(
+					'content',
+					_theme === 'dark'
+						? '#171717'
+						: _theme === 'oled-dark'
+							? '#000000'
+							: _theme === 'her'
+								? '#983724'
+								: '#ffffff'
+				);
+			}
+		}
+
 		console.log(_theme);
 	};
 
@@ -132,9 +157,29 @@
 </script>
 
 <div class="flex flex-col h-full justify-between text-sm">
-	<div class="  pr-1.5 overflow-y-scroll max-h-[25rem]">
+	<div class="  overflow-y-scroll max-h-[28rem] lg:max-h-full">
 		<div class="">
-			<div class=" mb-1 text-sm font-medium">{$i18n.t('UI Settings')}</div>
+			<div class=" mb-1 text-sm font-medium">{$i18n.t('WebUI Settings')}</div>
+
+			<div class="flex w-full justify-between">
+				<div class=" self-center text-xs font-medium">{$i18n.t('Theme')}</div>
+				<div class="flex items-center relative">
+					<select
+						class=" dark:bg-gray-900 w-fit pr-8 rounded py-2 px-2 text-xs bg-transparent outline-none text-right"
+						bind:value={selectedTheme}
+						placeholder="Select a theme"
+						on:change={() => themeChangeHandler(selectedTheme)}
+					>
+						<option value="system">⚙️ {$i18n.t('System')}</option>
+						<option value="dark">🌑 {$i18n.t('Dark')}</option>
+						<option value="oled-dark">🌃 {$i18n.t('OLED Dark')}</option>
+						<option value="light">☀️ {$i18n.t('Light')}</option>
+						<option value="her">🌷 Her</option>
+						<!-- <option value="rose-pine dark">🪻 {$i18n.t('Rosé Pine')}</option>
+						<option value="rose-pine-dawn light">🌷 {$i18n.t('Rosé Pine Dawn')}</option> -->
+					</select>
+				</div>
+			</div>
 
 			<div class=" flex w-full justify-between">
 				<div class=" self-center text-xs font-medium">{$i18n.t('Language')}</div>
@@ -153,19 +198,6 @@
 					</select>
 				</div>
 			</div>
-			<!-- {#if $i18n.language === 'en-US'} -->
-			<!-- 	<div class="mb-2 text-xs text-gray-400 dark:text-gray-500"> -->
-			<!-- 		Couldn't find your language? -->
-			<!-- 		<a -->
-			<!-- 			class=" text-gray-300 font-medium underline" -->
-			<!-- 			href="https://github.com/open-webui/open-webui/blob/main/docs/CONTRIBUTING.md#-translations-and-internationalization" -->
-			<!-- 			target="_blank" -->
-			<!-- 		> -->
-			<!-- 			Help us translate Open WebUI! -->
-			<!-- 		</a> -->
-			<!-- 	</div> -->
-			<!-- {/if} -->
-
 			<div>
 				<div class=" py-0.5 flex w-full justify-between">
 					<div class=" self-center text-xs font-medium">{$i18n.t('Notifications')}</div>
@@ -199,18 +231,16 @@
 		</div>
 
 		<div class="mt-2 space-y-3 pr-1.5">
-			{#if $user?.role === 'admin'}
-				<div class="flex justify-between items-center text-sm">
-					<div class="  font-medium">{$i18n.t('Advanced Parameters')}</div>
-					<button
-						class=" text-xs font-medium text-gray-500"
-						type="button"
-						on:click={() => {
-							showAdvanced = !showAdvanced;
-						}}>{showAdvanced ? $i18n.t('Hide') : $i18n.t('Show')}</button
-					>
-				</div>
-			{/if}
+			<div class="flex justify-between items-center text-sm">
+				<div class="  font-medium">{$i18n.t('Advanced Parameters')}</div>
+				<button
+					class=" text-xs font-medium text-gray-500"
+					type="button"
+					on:click={() => {
+						showAdvanced = !showAdvanced;
+					}}>{showAdvanced ? $i18n.t('Hide') : $i18n.t('Show')}</button
+				>
+			</div>
 
 			{#if showAdvanced}
 				<AdvancedParams admin={$user?.role === 'admin'} bind:params />
@@ -281,11 +311,12 @@
 
 	<div class="flex justify-end pt-3 text-sm font-medium">
 		<button
-			class="  px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-gray-100 transition rounded-lg"
+			class="px-3.5 py-1.5 text-sm font-medium bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full"
 			on:click={() => {
 				saveSettings({
 					system: system !== '' ? system : undefined,
 					params: {
+						stream_response: params.stream_response !== null ? params.stream_response : undefined,
 						seed: (params.seed !== null ? params.seed : undefined) ?? undefined,
 						stop: params.stop ? params.stop.split(',').filter((e) => e) : undefined,
 						temperature: params.temperature !== null ? params.temperature : undefined,
@@ -297,6 +328,7 @@
 						mirostat_tau: params.mirostat_tau !== null ? params.mirostat_tau : undefined,
 						top_k: params.top_k !== null ? params.top_k : undefined,
 						top_p: params.top_p !== null ? params.top_p : undefined,
+						min_p: params.min_p !== null ? params.min_p : undefined,
 						tfs_z: params.tfs_z !== null ? params.tfs_z : undefined,
 						num_ctx: params.num_ctx !== null ? params.num_ctx : undefined,
 						num_batch: params.num_batch !== null ? params.num_batch : undefined,

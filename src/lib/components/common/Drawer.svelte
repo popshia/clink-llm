@@ -3,23 +3,13 @@
 	import { flyAndScale } from '$lib/utils/transitions';
 	import { fade, fly, slide } from 'svelte/transition';
 
+	const dispatch = createEventDispatcher();
+
 	export let show = false;
-	export let size = 'md';
+	export let className = '';
 
 	let modalElement = null;
 	let mounted = false;
-
-	const sizeToWidth = (size) => {
-		if (size === 'xs') {
-			return 'w-[16rem]';
-		} else if (size === 'sm') {
-			return 'w-[30rem]';
-		} else if (size === 'md') {
-			return 'w-[48rem]';
-		} else {
-			return 'w-[56rem]';
-		}
-	};
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (event.key === 'Escape' && isTopModal()) {
@@ -42,15 +32,22 @@
 		window.addEventListener('keydown', handleKeyDown);
 		document.body.style.overflow = 'hidden';
 	} else if (modalElement) {
+		dispatch('close');
 		window.removeEventListener('keydown', handleKeyDown);
-		document.body.removeChild(modalElement);
-		document.body.style.overflow = 'unset';
+
+		if (document.body.contains(modalElement)) {
+			document.body.removeChild(modalElement);
+			document.body.style.overflow = 'unset';
+		}
 	}
 
 	onDestroy(() => {
 		show = false;
 		if (modalElement) {
-			document.body.removeChild(modalElement);
+			if (document.body.contains(modalElement)) {
+				document.body.removeChild(modalElement);
+				document.body.style.overflow = 'unset';
+			}
 		}
 	});
 </script>
@@ -67,7 +64,7 @@
 	}}
 >
 	<div
-		class=" mt-auto max-w-full w-full bg-gray-50 dark:bg-gray-900 max-h-[100dvh] overflow-y-auto scrollbar-hidden"
+		class=" mt-auto max-w-full w-full bg-gray-50 dark:bg-gray-900 dark:text-gray-100 {className} max-h-[100dvh] overflow-y-auto scrollbar-hidden"
 		on:mousedown={(e) => {
 			e.stopPropagation();
 		}}
